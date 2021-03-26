@@ -24,7 +24,7 @@
               @keydown.enter="add"
             />
           </div>
-          <div class="flex bg-white shadow-md p-1 rounded-md shadow-md flex-wrap">
+          <div class="flex bg-white shadow-md p-1 rounded-md flex-wrap">
             <span class="inline-flex items-center px-2 m-1 rounded-md text-xs font-medium bg-gray-300 text-gray-800 cursor-pointer">
               BTC
             </span>
@@ -173,12 +173,15 @@ export default {
   },
 
   created() {
-    const windowData = Object.fromEntries(new URL(window.location).searchParams.entries());
+    const windowData = Object.fromEntries(
+      new URL(window.location).searchParams.entries()
+    );
+
     if(windowData.filter) {
-      this.filter = windowData.filter
+      this.filter = windowData.filter;
     }
     if(windowData.page) {
-      this.page = windowData.page
+      this.page = windowData.page;
     }
 
     const tickersData = localStorage.getItem('cryptonomicon-list');
@@ -187,7 +190,7 @@ export default {
       this.tickers.forEach(ticker => {
         this.subscribeToUpdates(ticker.name)
       })
-    }    
+    }   
   },
 
   methods: {
@@ -195,7 +198,9 @@ export default {
     filteredTickers() {
       const start = (this.page - 1)*6;
       const end = this.page*6;
-      const filteredTickers = this.tickers.filter(ticker => ticker.name.includes(this.filter))
+      const filteredTickers = this.tickers.filter(ticker => 
+        ticker.name.includes(this.filter)
+      );
       this.hasNextPage = filteredTickers.length > end;
       return filteredTickers.slice(start,end)
     },
@@ -240,6 +245,7 @@ export default {
       return this.graph.map(
         price => 5+ ((price - minValue)*95) / (maxValue - minValue)
       )
+      
     }
   },
 
@@ -253,7 +259,6 @@ export default {
       )
     },
     page() {
-      this.page = 1;
       window.history.pushState(
         null, 
         document.title,
