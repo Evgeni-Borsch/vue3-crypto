@@ -156,7 +156,7 @@
 </template>
 
 <script>
-
+import {subscribeToTicker} from './api';
 
 export default {
   name: 'App',
@@ -175,20 +175,22 @@ export default {
       new URL(window.location).searchParams.entries()
     );
 
-    if(windowData.filter) {
-      this.filter = windowData.filter;
-    }
-    if(windowData.page) {
-      this.page = windowData.page;
-    }
-
+    const VALID_KEYS = ['filter','page'];
+    VALID_KEYS.forEach(key=>{
+      if(windowData[key]){
+        this[key] = windowData[key];
+      }
+    });
     const tickersData = localStorage.getItem('cryptonomicon-list');
+    
     if (tickersData) {
-      this.tickers = JSON.parse(tickersData);
+      this.tickers = JSON.parse(tickersData); 
       this.tickers.forEach(ticker => {
-        this.subscribeToUpdates(ticker.name)
-      })
-    }   
+        subscribeToTicker(ticker.name, newPrice => 
+          this.updateTicker(ticker.name, newPrice));
+      });
+    }
+    setInterval( this.updateTickers,5000);
   },
   computed: {
     startIndex() {
@@ -231,24 +233,24 @@ export default {
         page: this.page
       }
     }
-
   },
 
   methods: {
+    formatPrice(price){
+      if(price == '-') {
+        return price
+      }
+      return price > 1 
+            ? price.USD.toFixed(2) 
+            : price.USD.toPrecision(2);
+    },
 
-    subscribeToUpdates(tickerName) {
-      setInterval(async () => {
-        const f = await fetch (
-          `https://min-api.cryptocompare.com/data/price?fsym=${tickerName}&tsyms=USD&api_key=73302d28d5bf9f8ff43620332515ace6d89a2a4a3d13bcf35fcb34ec81075908`
-        );
-        const data = await f.json();
-        this.tickers.find(t => t.name === tickerName).price = data.USD >1 ? data.USD.toFixed(2) : data.USD.toPrecision(2)
-
-        if (this.selectedTicker?.name === tickerName) {
-          this.graph.push(data.USD);
-        }
-      },5000);
-      this.ticker = '';
+    updateTicker(tickerName, price) {
+      this.tickers
+        .filter(t => t.name === tickerName)
+        .forEach(t=> {
+          t.price = price;
+        })
     },
     add() {
       const currentTicker = {
@@ -257,9 +259,10 @@ export default {
       }
       this.tickers = [...this.tickers,currentTicker];
       this.filter = '';
-
-      localStorage.setItem('cryptonomicon-list', JSON.stringify(this.tickers));
-      this.subscribeToUpdates(currentTicker.name);
+      subscribeToTicker(this.ticker.name, newPrice => 
+          this.updateTicker(this.ticker.name, newPrice)
+      );
+          
     },
     select(ticker) {
       this.selectedTicker = ticker
