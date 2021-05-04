@@ -259,8 +259,8 @@ export default {
       }
       this.tickers = [...this.tickers,currentTicker];
       this.filter = '';
-      subscribeToTicker(this.ticker.name, newPrice => 
-          this.updateTicker(this.ticker.name, newPrice)
+      subscribeToTicker(currentTicker.name, newPrice => 
+          this.updateTicker(currentTicker.name, newPrice)
       );
           
     },

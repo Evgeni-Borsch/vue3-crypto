@@ -30,11 +30,7 @@ export const subscribeToTicker = (ticker, cb) => { //когда тикер об�
 };
 
 // функция отписки от ticker
-export const unsubscribeFromTicker = (ticker, cb) =>{
-  const subscribers = tickersHandlers.get(ticker) || [];
-  tickersHandlers.set(
-    ticker,
-    subscribers.filter(fn => fn!==cb)
-  )
+export const unsubscribeFromTicker = ticker =>{
+  tickersHandlers.delete(ticker);
 }
 setInterval(loadTickers, 5000);
