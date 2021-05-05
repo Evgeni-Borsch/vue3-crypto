@@ -25,20 +25,20 @@
             />
           </div>
           <div class="flex bg-white shadow-md p-1 rounded-md flex-wrap">
-            <span class="inline-flex items-center px-2 m-1 rounded-md text-xs font-medium bg-gray-300 text-gray-800 cursor-pointer">
+            <span @click="this.ticker = 'BTC'" class="inline-flex items-center px-2 m-1 rounded-md text-xs font-medium bg-gray-300 text-gray-800 cursor-pointer">
               BTC
             </span>
-            <span class="inline-flex items-center px-2 m-1 rounded-md text-xs font-medium bg-gray-300 text-gray-800 cursor-pointer">
+            <span @click="this.ticker = 'DOGE'" class="inline-flex items-center px-2 m-1 rounded-md text-xs font-medium bg-gray-300 text-gray-800 cursor-pointer">
               DOGE
             </span>
-            <span class="inline-flex items-center px-2 m-1 rounded-md text-xs font-medium bg-gray-300 text-gray-800 cursor-pointer">
-              BCH
+            <span @click="this.ticker = 'BNB'" class="inline-flex items-center px-2 m-1 rounded-md text-xs font-medium bg-gray-300 text-gray-800 cursor-pointer">
+              BNB
             </span>
-            <span class="inline-flex items-center px-2 m-1 rounded-md text-xs font-medium bg-gray-300 text-gray-800 cursor-pointer">
-              CHD
+            <span @click="this.ticker = 'ETH'" class="inline-flex items-center px-2 m-1 rounded-md text-xs font-medium bg-gray-300 text-gray-800 cursor-pointer">
+              ETH
             </span>
           </div>
-          <div class="text-sm text-red-600">Такой тикер уже добавлен</div>
+          <div v-if="this.tickers.indexOf(`${this.ticker}`)!==-1" class="text-sm text-red-600">Такой тикер уже добавлен</div>
         </div>
       </div>
       <button
@@ -115,7 +115,7 @@
       <h3 class="text-lg leading-6 font-medium text-gray-900 my-8">
         {{ selectedTicker.name }} - USD
       </h3>
-      <div class="flex items-end border-gray-600 border-b border-l h-64">
+      <div class="flex items-end border-gray-600 border-b border-l h-64" ref="graph">
         <div
           v-for="(bar, idx) in normalizedGraph"
           :key="idx"
@@ -169,7 +169,12 @@ export default {
       page: 1,
       filter: ''    }
   },
-  
+  mounted(){
+    window.addEventListener('resize', this.calculateMaxGraphElements)
+  },
+  beforeUnmount(){
+    window.removeEventListener('resize', this.calculateMaxGraphElements)
+  },
   created() {
     const windowData = Object.fromEntries(
       new URL(window.location).searchParams.entries()
@@ -193,6 +198,12 @@ export default {
     setInterval( this.updateTickers,5000);
   },
   computed: {
+    calculateMaxGraphElements(){
+      if(!this.$refs.graph){
+        return
+      }
+      return this.$refs.graph.clientWidth / 40;
+    },
     startIndex() {
       return (this.page - 1)*6
     },
@@ -252,6 +263,9 @@ export default {
           if(t === this.selectedTicker){
             this.graph.push(price)
           }
+          while(this.graph.length>this.maxGraphElements){
+            this.graph.shift();
+          }
           t.price = price;
         });
     },
@@ -265,7 +279,6 @@ export default {
       subscribeToTicker(currentTicker.name, newPrice => 
           this.updateTicker(currentTicker.name, newPrice)
       );
-          
     },
     select(ticker) {
       this.selectedTicker = ticker
