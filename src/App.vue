@@ -38,7 +38,6 @@
               CHD
             </span>
           </div>
-          <div class="text-sm text-red-600">Такой тикер уже добавлен</div>
         </div>
       </div>
       <button
