@@ -57,12 +57,9 @@ export default {
         }
     },
     mounted(){
-        console.log(this.selectedTicker);
     },
     methods:{
-        selectedTicker(){
-            // this.$emit('add-graph', this.graph);
-        }
+        
     },
     computed:{
         normalizedGraph() {
